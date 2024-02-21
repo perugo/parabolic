@@ -1,10 +1,10 @@
 export const DEFAULT = {
   SETTING: {
-    fieldX: 0.44, fieldY: 0.36,
-    nx: 300,
+    fieldX: 0.4, fieldY: 0.36,
+    nx: 500,
     totalPointsX: 0,
-    focalDistance: 0.2,
-    freq: 10e9, theta: 0
+    focalDistance: 0.13,
+    freq: 16e9, theta: 0
   },
   PADDING: {
     TF: 5,
@@ -18,7 +18,7 @@ export const DEFAULT = {
     "Pulse": { "peakPosition": 100, "widthFactor": 2.5 }
   },
   COLOR: {
-    colorThreshold: 2.2,
+    colorThreshold: 2.5,
     colorTransitionIndex: 0
   }
 }
@@ -31,11 +31,12 @@ export const BREAD = {
       { title: "解析領域の設定", link: "settingDomainGrid" }
     ],
     INPUTWAVE: [
-      { title: "平面波入力 (Total Field/ Scattered Field)", link: "home" },
+      { title: "パラボラアンテナ", link: "home" },
       { title: "波形の設定", link: "settingInputWave" }
     ]
   }
 }
+
 /*
 波形の設定
 解析領域の設定　fieldX,fieldY

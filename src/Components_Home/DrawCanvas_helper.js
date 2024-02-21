@@ -198,6 +198,7 @@ export function drawAntenna(ctx, ctx3, xnum, ynum, totalPointsX, dx, focalDistan
     const StartX = xnum - totalPointsX - paddingTF;
     const StartY = paddingTF;
     const ScatteredY = ynum - 2 * paddingTF;
+    console.error("xnum: "+xnum+" ynum: "+ynum);
     let clipPoint = clipPointTheta(totalPointsX, ScatteredY, theta, bitmap);
     ctx3.clearRect(0, 0, WIDTH, HEIGHT);
     ctx3.clearRect(0, 0, WIDTH, HEIGHT);
@@ -206,7 +207,7 @@ export function drawAntenna(ctx, ctx3, xnum, ynum, totalPointsX, dx, focalDistan
     ctx3.beginPath();
     ctx3.moveTo(clipPoint[0][0] * canvasDx + (StartX * canvasDx), clipPoint[0][1] * canvasDx + StartY * canvasDx);
     for (var i = 1; i < clipPoint.length; i++) {
-      ctx3.lineTo(clipPoint[i][0] * canvasDx + (StartX * canvasDx), clipPoint[i][1] * canvasDx + (StartY * canvasDx));
+      ctx3.lineTo(clipPoint[i][0] * canvasDx + (StartX * canvasDx), clipPoint[i][1] * canvasDx + StartY * canvasDx);
       //circle(clipPoint[i][0] * canvasDx + (StartX * canvasDx), clipPoint[i][1] * canvasDx + StartY * canvasDx, 3);
     }
     ctx3.closePath();
@@ -214,7 +215,7 @@ export function drawAntenna(ctx, ctx3, xnum, ynum, totalPointsX, dx, focalDistan
 
     const x_interval = interval * Math.cos((theta) * Math.PI / 180); // x軸方向の間隔
     const y_interval = +interval * Math.cos((theta - 90) * Math.PI / 180); // y軸方向の間隔
-    const length = WIDTH * 2;
+    const length = WIDTH>HEIGHT? WIDTH*2:HEIGHT*2;
     const waveAngle = theta + 90;
     let centerX, centerY;
     if (theta < 90) {
@@ -222,7 +223,7 @@ export function drawAntenna(ctx, ctx3, xnum, ynum, totalPointsX, dx, focalDistan
       centerY = StartY * canvasDx - 1;
     } else if (theta < 180) {
       centerX = (StartX + totalPointsX) * canvasDx + 1;
-      centerY = StartX * canvasDx - 1;
+      centerY = StartY * canvasDx - 1;
     } else if (theta < 270) {
       centerX = (StartX + totalPointsX) * canvasDx + 1;
       centerY = (StartY + ScatteredY) * canvasDx + 1;

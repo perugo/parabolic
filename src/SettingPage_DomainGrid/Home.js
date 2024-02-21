@@ -150,32 +150,42 @@ gap:40px;
 align-items:center;
 justify-content:center;
 `
-export const Home = ({ drawData, setShowWindow, setHomeRectDrawData, setSetting,setPadding,defaultPadding }) => {
+export const Home = ({ drawData, setShowWindow, setHomeRectDrawData, setSetting, setPadding, defaultPadding }) => {
   const [rectDrawData, setRectDrawData] = useState({ width: 0, height: 0 });
   const [rectDraftDrawData, setRectDraftDrawData] = useState({ width: 0, height: 0 });
   const [draftDrawData, setDraftDrawData] = useState({});
+
+  const [draftSetting, setDraftSetting] = useState({});
 
   useEffect(() => {
     if (!checker_DRAWDATA(drawData)) return;
     setRectDrawData(maker_RECT(drawData.setting));
     setRectDraftDrawData(maker_RECT(drawData.setting));
     setDraftDrawData(drawData);
+    setDraftSetting(drawData.setting);
   }, [drawData])
 
-  const gridBoxProps = {
-    draftDrawData, setDraftDrawData,
-  }
-  const domainBoxProps = {
-    draftDrawData, setDraftDrawData,
-  }
+  useEffect(() => {
+    if (!checker_DRAWDATA(draftDrawData)) return;
+    setDraftDrawData({ ...draftDrawData, setting: draftSetting });
+  }, [draftSetting])
+
   useEffect(() => {
     if (!checker_DRAWDATA(draftDrawData)) return;
     setRectDraftDrawData(maker_RECT(draftDrawData.setting));
   }, [draftDrawData])
+
+  const gridBoxProps = {
+    setting: draftSetting, setSetting: setDraftSetting,
+  }
+  const domainBoxProps = {
+    setting: draftSetting, setSetting: setDraftSetting,
+  }
+
   const save = () => {
     setDraftDrawData((currentDraft) => {
       setHomeRectDrawData(maker_RECTForHOME(currentDraft.setting));
-      setSetting({...currentDraft.setting,totalPointsX:0,focalDistance:currentDraft.setting.fieldX/2});
+      setSetting({ ...currentDraft.setting, totalPointsX: 0, focalDistance: currentDraft.setting.fieldX*0.55 });
     });
     setPadding(defaultPadding);
 
@@ -199,11 +209,11 @@ export const Home = ({ drawData, setShowWindow, setHomeRectDrawData, setSetting,
         {rectDrawData && rectDrawData.width !== 0 && rectDraftDrawData && rectDraftDrawData.width !== 0 && (
           <WidthSetter>
             <Wrapper style={{ width: rectDrawData.width, height: rectDrawData.height }}>
-              <DrawCanvas drawData={drawData} originalDrawData={drawData}></DrawCanvas>
+              <DrawCanvas drawData={drawData} originalDrawData={drawData} defaultPadding={defaultPadding}></DrawCanvas>
             </Wrapper>
             {ArrowRowComponent}
             <Wrapper style={{ width: rectDraftDrawData.width, height: rectDraftDrawData.height }}>
-              <DrawCanvas drawData={draftDrawData} originalDrawData={drawData}></DrawCanvas>
+              <DrawCanvas drawData={draftDrawData} originalDrawData={drawData} defaultPadding={defaultPadding}></DrawCanvas>
             </Wrapper>
           </WidthSetter>
         )}
@@ -229,8 +239,12 @@ export const Home = ({ drawData, setShowWindow, setHomeRectDrawData, setSetting,
     </Container>
   )
 };
+
+/*
+
+*/
 export function maker_RECT(setting) {
-  const {nx, fieldY, fieldX } = setting;
+  const { nx, fieldY, fieldX } = setting;
   const xnum = nx;
   const ynum = Math.ceil(fieldY / (fieldX / xnum));
 
@@ -273,9 +287,7 @@ export function checker_DRAWDATA(obj1) {
 }
 
 export function maker_RECTForHOME(set) {
-  console.log("setting is");
-  console.log(set)
-  const {nx, fieldY, fieldX } = set;
+  const { nx, fieldY, fieldX } = set;
   const xnum = nx;
   const ynum = Math.ceil(fieldY / (fieldX / xnum));
 

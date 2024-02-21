@@ -59,23 +59,23 @@ export const BoxFocalDistance = ({ setting, setSetting, padding, setPadding }) =
   const prevSetting = useRef(null);
   const prevPadding = useRef(null)
   useEffect(() => {
-    if (!checker_OK(setting,padding)) return;
+
+    if (!checker_OK(setting, padding)) return;
     if (checker_NOCHANGE(setting, padding, prevSetting.current, prevPadding.current)) return;
     if (prevSetting.current === null) {
-      setDispTFX(setting.totalPointsX);
-      setFocalValue(setting.focalDistance);
+      const { fieldX,nx,totalPointsX: inputTotalPointsX, focalDistance: inputFocalDistance } = setting;
 
-      const paddingmarks = makePYMarks(setting, padding, setDispPY, setPYMin, setPYMax, setAntennaYnumPoints);
+      if(inputTotalPointsX!==0)setDispTFX(inputTotalPointsX);
+      setFocalValue(inputFocalDistance);
+
+      const paddingmarks = makePYMarks(setting, padding,meterExponent,dispDx, setDispPY, setPYMin, setPYMax, setAntennaYnumPoints);
       setPYMarks(paddingmarks);
 
-      const { fieldX, nx } = setting;
       const dx = fieldX / nx;
       setDispDx(dx);
       setMeterExponent(initMeterExponent(fieldX));
-
-      if (setting.totalPointsX === 0) return;
     }
-    //console.log("BoxFocalDistance everything else");
+    console.log("FocalBox EveryThing");
     const focalmarks = makeFocalMarks(setting, padding, setFocalvalueMin, setFocalInc, setFocalMax);
     setFocalMarks(focalmarks);
 
@@ -83,8 +83,15 @@ export const BoxFocalDistance = ({ setting, setSetting, padding, setPadding }) =
     const tfxmarks = makeTFXMarks(setting, padding, dispTFX, setDispTFX, setTFXMin, setTFXMax);
     setTFXMarks(tfxmarks);
 
+    const { totalPointsX: inputTotalPointsX, focalDistance: inputFocalDistance } = setting;
+    if (inputTotalPointsX !== 0) setDispTFX(inputTotalPointsX);
+    setFocalValue(inputFocalDistance);
+
+
+    if (setting.totalPointsX === 0) return;
     prevSetting.current = setting;
     prevPadding.current = padding;
+
   }, [setting, padding])
   useEffect(() => {
     if (reserveIdRef.current) {
@@ -94,7 +101,7 @@ export const BoxFocalDistance = ({ setting, setSetting, padding, setPadding }) =
       if (focalvalueMin === 0) {
       } else {
         setSetting({ ...setting, totalPointsX: dispTFX, focalDistance: focalvalue });
-        setPadding({ ...padding, YAntenna: (PYMax + 3 - dispPY) });
+        setPadding({ ...padding, YAntenna: (PYMax + 0 - dispPY) });
       }
       reserveIdRef.current = null;
     }, 600);
@@ -103,7 +110,7 @@ export const BoxFocalDistance = ({ setting, setSetting, padding, setPadding }) =
     if (focalvalueMin === 0) {
     } else {
       setSetting({ ...setting, totalPointsX: dispTFX, focalDistance: focalvalue });
-      setPadding({ ...padding, YAntenna: (PYMax + 3 - dispPY) });
+      setPadding({ ...padding, YAntenna: (PYMax + 0 - dispPY) });
     }
     timeoutIdRef.current = setTimeout(() => {
       timeoutIdRef.current = null;
@@ -125,10 +132,7 @@ export const BoxFocalDistance = ({ setting, setSetting, padding, setPadding }) =
   const handlePYSliderChanged = (newValue) => {
     setDispPY(newValue);
   }
-  const dispMeterUnit = (value) => {
-    const matchedOptions = meterOptions.find(option => option.value === value);
-    return matchedOptions ? matchedOptions.label : "";
-  }
+
   return (
     <Box>
       <FrontHeader>
@@ -145,9 +149,8 @@ export const BoxFocalDistance = ({ setting, setSetting, padding, setPadding }) =
         <ColumnLayout>
           <GridColumn>
             <TextRow>
-              <Text style={{ fontSize: "14px", padding: "3px 7px 0px 0px" }}>開口直径の格子数: {antennaYnumPoints - 2 * (PYMax + 3 - dispPY)}</Text>
-              <Text style={{ fontSize: "14px", padding: "3px 7px 0px 15px" }}> ( 直径  {roundToThreeSignificantFigures(Math.pow(10, meterExponent) * dispDx * (antennaYnumPoints - 2 * (PYMax + 3 - dispPY)))} {dispMeterUnit(meterExponent)} )</Text>
-
+              <Text style={{ fontSize: "14px", padding: "3px 7px 0px 0px" }}>直径  {roundToThreeSignificantFigures(Math.pow(10, meterExponent) * dispDx * (antennaYnumPoints - 2 * (PYMax + 3 - dispPY)))} {dispMeterUnit(meterExponent)} </Text>
+              <Text style={{ fontSize: "14px", padding: "3px 7px 0px 15px" }}> (  開口直径の格子数: {antennaYnumPoints - 2 * (PYMax + 3 - dispPY)} )</Text>
             </TextRow>
             <SliderWrapper>
               <Slider
@@ -163,7 +166,7 @@ export const BoxFocalDistance = ({ setting, setSetting, padding, setPadding }) =
             </SliderWrapper>
 
             <TextRow>
-              <Text style={{ fontSize: "14px", padding: "3px 7px 0px 0px" }}>焦点距離: {roundToThreeSignificantFigures(Math.pow(10, meterExponent) *focalvalue).toString()}  {dispMeterUnit(meterExponent)}</Text>
+              <Text style={{ fontSize: "14px", padding: "3px 7px 0px 0px" }}>焦点距離: {roundToThreeSignificantFigures(Math.pow(10, meterExponent) * focalvalue).toString()}  {dispMeterUnit(meterExponent)}</Text>
             </TextRow>
             <SliderWrapper>
               <Slider
@@ -204,10 +207,14 @@ const settingFields = ['fieldX', 'fieldY', 'nx', 'totalPointsX',
   'focalDistance', 'freq', 'theta'];
 const paddingFields = ['TF', 'XRightAntenna', 'XLeftAntenna', 'YAntenna'];
 
-function checker_OK(setting,padding) {
+const dispMeterUnit = (value) => {
+  const matchedOptions = meterOptions.find(option => option.value === value);
+  return matchedOptions ? matchedOptions.label : "";
+}
+function checker_OK(setting, padding) {
   if (!setting || !padding) return false;
-  if(!settingFields.every(field => typeof setting[field] === 'number')) return false;
-  if(!paddingFields.every(field => typeof padding[field] === 'number')) return false;
+  if (!settingFields.every(field => typeof setting[field] === 'number')) return false;
+  if (!paddingFields.every(field => typeof padding[field] === 'number')) return false;
   return true;
 
 }
@@ -253,7 +260,7 @@ const makeFocalMarks = (setting, padding, setFocalvalueMin, setFocalInc, setFoca
   const { fieldX, fieldY, nx, focalDistance, totalPointsX, freq, theta } = setting;
   const { TF, XRightAntenna, XLeftAntenna, YAntenna } = padding;
   const dx = fieldX / nx;
-  const meterE=Math.pow(10,initMeterExponent(fieldX));
+  const meterE = Math.pow(10, initMeterExponent(fieldX));
   const ynum = Math.ceil(fieldY / dx);
   const MINIMUPADDING_YANTENNA = YAntenna;
   const AntennaYnumPoints = ynum - 2 * TF - 2 * MINIMUPADDING_YANTENNA;
@@ -272,20 +279,20 @@ const makeFocalMarks = (setting, padding, setFocalvalueMin, setFocalInc, setFoca
   let initialMarks = {};
 
   let i = 0;
-  initialMarks[i] = (roundToThreeSignificantFigures(focalmin*meterE)).toString();
+  initialMarks[i] = (roundToThreeSignificantFigures(focalmin * meterE)).toString();
   for (i = 1; i <= SLIDERNUM; i++) {
     if ((i * inc) >= passInsident) {
-      initialMarks[i] = (roundToThreeSignificantFigures(meterE*(i * inc + focalmin))).toString();
+      initialMarks[i] = (roundToThreeSignificantFigures(meterE * (i * inc + focalmin))).toString();
       passInsident += insident;
     }
   }
-  initialMarks[i - 1] = (roundToThreeSignificantFigures(meterE*((i - 1) * inc + focalmin))).toString();
+  initialMarks[i - 1] = (roundToThreeSignificantFigures(meterE * ((i - 1) * inc + focalmin))).toString();
 
   setFocalMax(SLIDERNUM);
   return initialMarks;
 }
 
-const makePYMarks = (setting, padding, setDispPY, setPYMin, setPYMax, setAntennaYnumPoints) => {
+const makePYMarks = (setting, padding,meterExponent,dispDx, setDispPY, setPYMin, setPYMax, setAntennaYnumPoints) => {
   const { fieldX: inputFieldX, fieldY: inputFieldY, nx: inputXnum,
     focalDistance: inputFocalDistance, totalPointsX: inputTotalPointsX, freq: inputFreq, theta: inputTheta } = setting;
   const { TF: paddingTF, XRightAntenna: paddingXRightAntenna, XLeftAntenna: paddingXLeftAntenna, YAntenna: paddingYAntenna } = padding;
@@ -305,8 +312,10 @@ const makePYMarks = (setting, padding, setDispPY, setPYMin, setPYMax, setAntenna
   for (let i = paddingMax; i >= MINIMUPADDING_YANTENNA; i--) {
     //console.log(paddingMax-i);
     const place = AntennaYnumPoints - i * 2;
+
+            
     if (place % 20 === 0 || place % 20 === 1) {
-      initialMarks[paddingMax - i + MINIMUPADDING_YANTENNA] = place.toString();
+      initialMarks[paddingMax - i + MINIMUPADDING_YANTENNA] = (roundToThreeSignificantFigures(Math.pow(10, meterExponent) * dispDx * place)).toString();
     } else {
       initialMarks[paddingMax - i + MINIMUPADDING_YANTENNA] = ('').toString();
     }

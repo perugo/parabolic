@@ -250,7 +250,7 @@ export class FDTD2D_PML {
     this.dt = fdtd_input.dt;
     this.simulationNum = 0;
     this.t = 0;
-    this.Ta = (this.dx / c) * 0.0;
+    this.Ta = (this.dx / c) * 0.35;
     this.Z0 = Math.sqrt(M0 / E0);
     this.k0 = 2.0 * Math.PI / (c / this.freq);
     const theta_in = this.theta * Math.PI / 180;
@@ -265,11 +265,11 @@ export class FDTD2D_PML {
     const dx = this.dx;
     const dt = this.dt;
 
-    this.ll = 0.15 * Math.sqrt(this.totalPointsX * this.totalPointsX + this.totalPointsY * this.totalPointsY) * dx;
+    this.ll = 0.5 * Math.sqrt(this.totalPointsX * this.totalPointsX + this.totalPointsY * this.totalPointsY) * dx;
     if (this.theta === 0) {
-      this.ll = 0.35 * Math.sqrt(this.totalPointsX * this.totalPointsX + this.totalPointsY * this.totalPointsY) * dx;
+      this.ll = 0.4 * Math.sqrt(this.totalPointsX * this.totalPointsX + this.totalPointsY * this.totalPointsY) * dx;
     } else if (this.theta <= 90) {
-      this.ll = 0.35 * Math.sqrt(this.totalPointsX * this.totalPointsX + this.totalPointsY * this.totalPointsY) * dx;
+      this.ll = 0.4 * Math.sqrt(this.totalPointsX * this.totalPointsX + this.totalPointsY * this.totalPointsY) * dx;
 
     } else if (this.theta >= 180 && this.theta < 270) {
       this.ll = 0.4 * Math.sqrt(this.totalPointsX * this.totalPointsX + this.totalPointsY * this.totalPointsY) * dx;
@@ -279,9 +279,11 @@ export class FDTD2D_PML {
 
     this.omega = 2 * Math.PI * this.freq;
     this.y = []; this.z = [];
-    for (let i = 0; i < nx; i++)this.z[i] = (i - (nx + (nx - this.totalPointsX - 25)) / 2) * this.dx;
+    for (let i = 0; i < nx; i++)this.z[i] = (i - nx + this.totalPointsX*0.75-100) * this.dx;
     for (let n = 0; n < ny; n++)this.y[n] = (n - (ny) / 2) * this.dx;
-
+    for(let i=0;i<nx;i++){
+      console.log(i+"i: "+this.z[i]);
+    }
 
 
     this.Ez = Array.from({ length: nx }).map(() => Array.from({ length: ny }).fill(0));
@@ -687,8 +689,8 @@ export class ColorCode {
     let slopeL;
     let shiftL;
     if (index === 0) {
-      slopeF = -0.22;
-      shiftF = 24.0;
+      slopeF = -0.25;
+      shiftF = 25.0;
       slopeL = -0.08;
       shiftL = 70.0;
     } else {

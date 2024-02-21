@@ -40,15 +40,15 @@ const SmallLabel = styled.div`
 `;
 
 export const BoxDomain = ({
-  draftDrawData, setDraftDrawData,
+  setting, setSetting,
 }) => {
   const [strField, setStrField] = useState({});
   const timeoutIdRef = useRef();
 
   useEffect(() => {
-    if (!isStateComplete(draftDrawData)) return;
-    updateStringStates(draftDrawData, setStrField);
-  }, [draftDrawData])
+    if (!isStateComplete(setting)) return;
+    updateStringStates(setting, setStrField);
+  }, [setting])
 
   const handleInputChange = (field) => (e) => {
     const value = e.target.value;
@@ -68,16 +68,10 @@ export const BoxDomain = ({
   const handleSetInputTimeout = () => {
     setStrField((current) => {
       let updated = {
-        fieldX: isValidNumber(current.fieldX) ? roundToFourSignificantFigures(current.fieldX) : draftDrawData.setting.fieldX,
-        fieldY: isValidNumber(current.fieldY) ? roundToFourSignificantFigures(current.fieldY) : draftDrawData.setting.fieldY
+        fieldX: isValidNumber(current.fieldX) ? roundToFourSignificantFigures(current.fieldX) : setting.fieldX,
+        fieldY: isValidNumber(current.fieldY) ? roundToFourSignificantFigures(current.fieldY) : setting.fieldY
       }
-      setDraftDrawData(prevData => ({
-        ...prevData,
-        setting: {
-          ...prevData.setting,
-          ...updated // Spread the contents of 'updated' here, not the object itself
-        }
-      }));
+      setSetting({...setting,...updated});
     })
   };
 

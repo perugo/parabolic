@@ -6,6 +6,8 @@ import {
   checker_DRAWDATA,
   checker_NOCHANGE,
   compare_RectNOCHANGE,
+  compare_DIFFERORIGNAL,
+  checker_PADDING,
   useCanvasAndWidthHeight,
   giveTFPointsX,
   drawAntenna,
@@ -38,7 +40,7 @@ var dx;
 var theta;
 var totalPointsX;
 var freq;
-export const DrawCanvas = ({ drawData,originalDrawData }) => {
+export const DrawCanvas = ({ drawData,originalDrawData,defaultPadding }) => {
   const layoutWrapperRef = useRef(null); //canvasの親<div>Ref
   const prevDrawDataRef = useRef(null); //一つ前のdrawData
   const originalDrawDataRef=useRef(null);
@@ -65,16 +67,17 @@ export const DrawCanvas = ({ drawData,originalDrawData }) => {
     if (!checker_DRAWDATA(originalDrawData)) return;
     originalDrawDataRef.current=originalDrawData;
   },[originalDrawData])
-  
+
   useEffect(() => {
-    if (!checker_DRAWDATA(drawData) || width === 0 || originalDrawDataRef.current===null) return;
+    console.log(drawData);
+    if (!checker_DRAWDATA(drawData) || width === 0 || originalDrawDataRef.current===null || !checker_PADDING(defaultPadding)) return;
       //console.log("no change");
     if (checker_NOCHANGE(drawData, prevDrawDataRef.current) && compare_RectNOCHANGE(prevRect, width, height)) {
       return;
     } else {
       console.log("everything else");
       setUpdateCounter(c => c + 1);
-      const { setting, padding } = drawData;
+      const { setting,padding:inputPadding } = drawData;
       const { fieldX: inputFieldX, fieldY: inputFieldY, nx: inputXnum,
         focalDistance: inputFocalDistance, totalPointsX: inputTotalPointsX, freq: inputFreq, theta: inputTheta } = setting;
       freq = inputFreq;
@@ -84,16 +87,24 @@ export const DrawCanvas = ({ drawData,originalDrawData }) => {
       dx = inputFieldX / inputXnum;
       ynum = Math.ceil(inputFieldY / dx);
       canvasDx = width / xnum;
-      totalPointsX = giveTFPointsX(inputTotalPointsX, xnum, ynum, dx, inputFocalDistance, padding);
-      if (inputTotalPointsX !== totalPointsX) {
-        console.error("totalPointsX 拡大: "+totalPointsX);
+      let tmpTotalPointsX=inputTotalPointsX;
+      let tmpFocalDistance=inputFocalDistance;
+      let tmpPadding=inputPadding;
+      if(compare_DIFFERORIGNAL(drawData,originalDrawDataRef.current)){
+        tmpTotalPointsX=0;
+        theta=0;
+        tmpFocalDistance=inputFieldX*0.55;
+        tmpPadding=defaultPadding;
       }
-      drawBackGround(ctx4Ref.current, xnum, ynum, canvasDx, totalPointsX, padding);
-      drawAntenna(ctx2Ref.current, ctx3Ref.current, xnum, ynum, totalPointsX, dx, inputFocalDistance, canvasDx, padding, fieldX, freq, theta);
-      drawCircleText(ctx1Ref.current, xnum, height, dx, canvasDx, inputFocalDistance, padding);
+      totalPointsX = giveTFPointsX(tmpTotalPointsX, xnum, ynum, dx, tmpFocalDistance, tmpPadding);
+      if (tmpTotalPointsX !== totalPointsX) {
+      }
+      drawBackGround(ctx4Ref.current, xnum, ynum, canvasDx, totalPointsX, tmpPadding);
+      drawAntenna(ctx2Ref.current, ctx3Ref.current, xnum, ynum, totalPointsX, dx, tmpFocalDistance, canvasDx, tmpPadding, fieldX, freq, theta);
+      drawCircleText(ctx1Ref.current, xnum, height, dx, canvasDx, tmpFocalDistance, tmpPadding);
     }
     
-    drawData.setting.totalPointsX=totalPointsX;
+    //drawData.setting.totalPointsX=totalPointsX;
     prevDrawDataRef.current = drawData;
     prevRect.current = { width: width, height: height };
   }, [drawData, width, height,originalDrawDataRef]);

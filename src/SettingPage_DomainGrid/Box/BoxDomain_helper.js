@@ -6,21 +6,13 @@ export const validateInput = (value) => {
 }
 const settingFields = ['fieldX', 'fieldY', 'nx', 'totalPointsX',
   'focalDistance', 'freq', 'theta'];
-const paddingFields = ['TF', 'XRightAntenna', 'XLeftAntenna', 'YAntenna'];
 
-function checker_SETTING(obj1) {
-  if (!obj1) return false;
-
-  const requiredFields = {
-    setting: (data) => {
-      if (!data) return false;
-      return settingFields.every(field => typeof data[field] === 'number');
-    },
-  }
-  return Object.keys(requiredFields).every(key =>
-    requiredFields[key](obj1[key])
-  );
+function checker_SETTING(set) {
+  if (!set) return false;
+  if(!settingFields.every(field => typeof set[field] === 'number')) return false;
+  return true;
 }
+
 export const isValidKey = (key) => {
   const regexPattern =/[0-9.]/
   return regexPattern.test(key) ||
@@ -33,19 +25,9 @@ export const handleKeyDown = () => (e) => {
     e.preventDefault();
   }
 };
-export const setToDefault = (defaultAmplitudeScaler, setStrAmplitudeScaler) => {
-  const { Rise: { slope, shift }, Pulse: { peakPosition, widthFactor }, simulationNum } = defaultAmplitudeScaler;
-  const stringAmplitudeScaler = {
-    simulationNum: simulationNum.toString(),
-    slope: slope.toString(),
-    shift: shift.toString(),
-    peakPosition: peakPosition.toString(),
-    widthFactor: widthFactor.toString()
-  };
-  setStrAmplitudeScaler(stringAmplitudeScaler);
-}
-export const updateStringStates = (draftDrawData, setStrField) => {
-  const { fieldX,fieldY } = draftDrawData.setting;
+
+export const updateStringStates = (setting, setStrField) => {
+  const { fieldX,fieldY } = setting;
   setStrField({
     fieldX:fieldX,
     fieldY:fieldY

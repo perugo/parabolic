@@ -224,22 +224,21 @@ const ButtonSmall = styled.div`
     background-color:#EB5F07;
 }
 `
-export const BoxGrid = ({ draftDrawData, setDraftDrawData }) => {
+export const BoxGrid = ({ setting, setSetting }) => {
   const timeoutIdRef = useRef();
   const [nx, setNx] = useState(0);//rc-sliderが少数点の値を扱えないため、d*100したもの
   const [marks, setMarks] = useState({});
   const [nxMin, setNxMin] = useState(0);
   const [nxMax, setNxMax] = useState(0);
   useEffect(() => {
-    if (!checker_DRAWDATA(draftDrawData)) return;
-    const { nx: firstNx } = draftDrawData.setting;
-
-    if (firstNx === undefined) return;
-    setNx(firstNx);
+    if (!checker_SETTING(setting)) return;
+    const { nx: inputNx } = setting;
+    setNx(inputNx);
     const initialMarks = calculateMarks(setNxMin, setNxMax);
     setMarks(initialMarks);
 
-  }, [draftDrawData]);
+  }, [setting]);
+
   useEffect(() => {
     clearTimeout(timeoutIdRef.current);
     startTimer();
@@ -250,7 +249,7 @@ export const BoxGrid = ({ draftDrawData, setDraftDrawData }) => {
   };
 
   const handleTimeout = () => {
-    setDraftDrawData({ ...draftDrawData, setting: { ...draftDrawData.setting, nx: nx } });
+    setSetting({ ...setting,nx: nx } );
   };
 
   const startTimer = () => {
@@ -317,24 +316,11 @@ const calculateMarks = (setNxMin, setNxMax) => {
   return initialMarks;
 };
 
-
 const settingFields = ['fieldX', 'fieldY', 'nx', 'totalPointsX',
   'focalDistance', 'freq', 'theta'];
-const paddingFields = ['TF', 'XRightAntenna', 'XLeftAntenna', 'YAntenna'];
-function checker_DRAWDATA(obj1) {
-    if (!obj1) return false;
-  
-    const requiredFields = {
-      setting: (data) => {
-        if (!data) return false;
-        return settingFields.every(field => typeof data[field] === 'number');
-      },
-      padding: (data) => {
-        if (!data) return false;
-        return paddingFields.every(field => typeof data[field] === 'number');
-      },
-    }
-    return Object.keys(requiredFields).every(key =>
-      requiredFields[key](obj1[key])
-    );
-  }
+
+function checker_SETTING(set) {
+  if (!set) return false;
+  if(!settingFields.every(field => typeof set[field] === 'number')) return false;
+  return true;
+}

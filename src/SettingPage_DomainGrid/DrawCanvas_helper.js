@@ -23,6 +23,11 @@ export function checker_DRAWDATA(obj1) {
   );
 }
 
+export function checker_PADDING(padding) {
+  if (!padding) return false;
+  if(!paddingFields.every(field => typeof padding[field] === 'number')) return false;
+  return true;
+}
 export function checker_NOCHANGE(obj1, obj2) {
   if (!obj1 || !obj2) return false;
   if (!check_SETTING_NOCHANGE(obj1.setting, obj2.setting)) return false;
@@ -41,7 +46,16 @@ export function compare_ONLYFREQTHETACHANGE(obj1, obj2) {
   const FREQTHETAfields = ['freq', 'theta'];
   return !fieldsMatch(setting1, setting2, FREQTHETAfields);
 }
+export function compare_DIFFERORIGNAL(obj1,obj2){
+  if (!obj1 || !obj2) return true;
+  console.log("compare_DIFFERORIGINAL");
+  console.log(obj1);
+  console.log(obj2);
+  const { setting: setting1} = obj1;
+  const { setting: setting2} = obj2;
+  return !check_SETTING_NOCHANGE(setting1, setting2);
 
+}
 export const compare_RectNOCHANGE = (prevRect, width, height) => {
   return (prevRect.current.width === width && prevRect.current.height === height);
 }

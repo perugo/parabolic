@@ -33,8 +33,8 @@ var nx;
 var ny;
 var pmlL;
 var dx;
-const interval = 90;
-const drawcanvasrate = 4;
+const interval = 100;
+const drawcanvasrate = 5;
 var filmnum = 100;
 var filmcounter = 0;
 const MEDIUM_COLOR = ['rgb(255,255,255)', 'rgb(0,0,0)'];
@@ -57,9 +57,8 @@ export const SimulationCanvas = ({ simulationData, showSimulation, setShowSimula
     if (ctxRef.current) {
       ctxRef.current.clearRect(0, 0, RECT.width, RECT.height);
       ctxbackgroundRef.current.clearRect(0, 0, RECT.width, RECT.height);
-
     }
-
+    
     if (!checker_FDTDINPUT(FDTD_Input) || RECT.width === 0) return;
     console.log("FDTD_INPUT useEffect");
     FDTD2D_PMLRef.current = new FDTD2D_PML(FDTD_Input);
